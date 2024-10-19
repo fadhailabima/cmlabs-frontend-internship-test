@@ -32,14 +32,12 @@ export const getMealList = async (
   category: string
 ): Promise<{ meals: Meal[]; categoryDescription: string }> => {
   try {
-    // Ambil data makanan berdasarkan kategori
     const mealResponse = await axios.get(
       `https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`
     );
 
     console.log(mealResponse.data.meals);
 
-    // Ambil data kategori untuk mendapatkan deskripsi
     const categoryResponse = await axios.get(
       "https://www.themealdb.com/api/json/v1/1/categories.php"
     );
@@ -54,7 +52,7 @@ export const getMealList = async (
 
     return {
       meals: mealResponse.data.meals,
-      categoryDescription: categoryData.strCategoryDescription,
+      categoryDescription: categoryData?.strCategoryDescription || "",
     };
   } catch (error) {
     console.log(error);

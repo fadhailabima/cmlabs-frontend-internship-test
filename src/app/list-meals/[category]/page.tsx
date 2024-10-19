@@ -13,10 +13,11 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { ChevronRightIcon } from "@chakra-ui/icons";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 export default function ListMeal({
   params: { category },
@@ -70,56 +71,78 @@ export default function ListMeal({
           {categoryDescription}
         </p>
       </div>
-      <div className="p-2 md:px-16 content-center">
+      <div className="p-2 md:p-16 content-center">
         <SimpleGrid
           columns={{ base: 2, md: 2, lg: 4 }}
           spacing={{ base: 4, lg: 8 }}
         >
-          {meals?.map((meal) => (
-            <Card maxW="sm" key={meal.idMeal}>
-              <CardBody>
-                <Box position="relative">
-                  <Image src={meal.strMealThumb} borderRadius="lg" />
-                  <Box
-                    position="absolute"
-                    top="0"
-                    left="0"
-                    width="100%"
-                    height="100%"
-                    bg="gray.500"
-                    opacity="0.5"
-                    borderRadius="lg"
-                  />
-                  <Heading
-                    size={{ base: "sm", md: "md" }}
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    transform="translate(-50%, -50%)"
-                    color="white"
-                    textAlign="center"
-                  >
-                    {meal.strMeal}
-                  </Heading>
-                </Box>
-                <Link href={`/detail-meal/${meal.idMeal}`}>
-                  <Button
-                    variant="solid"
-                    colorScheme="blue"
-                    width={"100%"}
-                    mt={4}
-                    fontSize={{ base: "sm", md: "md" }}
-                    padding={{ base: "8px", md: "16px" }}
-                    mx="auto"
-                  >
-                    View Detail
-                  </Button>
-                </Link>
-              </CardBody>
-            </Card>
+          {meals?.map((meal, index) => (
+            <MealCard
+              key={meal.idMeal}
+              meal={meal}
+              index={index}
+            />
           ))}
         </SimpleGrid>
       </div>
     </>
   );
 }
+
+const MealCard = ({ meal, index }: { meal: Meal; index: number }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 20 }}
+      transition={{ delay: index * 0.1 }}
+    >
+      <Card maxW="sm">
+        <CardBody>
+          <Box position="relative">
+            <Image src={meal.strMealThumb} borderRadius="lg" />
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              width="100%"
+              height="100%"
+              bg="gray.500"
+              opacity="0.5"
+              borderRadius="lg"
+            />
+            <Heading
+              size={{ base: "sm", md: "md" }}
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              color="white"
+              textAlign="center"
+            >
+              {meal.strMeal}
+            </Heading>
+          </Box>
+          <Link href={`/detail-meal/${meal.idMeal}`}>
+            <Button
+              variant="solid"
+              colorScheme="blue"
+              width={"100%"}
+              mt={4}
+              fontSize={{ base: "sm", md: "md" }}
+              padding={{ base: "8px", md: "16px" }}
+              mx="auto"
+            >
+              View Detail
+            </Button>
+          </Link>
+        </CardBody>
+      </Card>
+    </motion.div>
+  );
+};

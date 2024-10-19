@@ -13,6 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 export default function Home() {
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -69,51 +71,69 @@ export default function Home() {
           columns={{ base: 2, md: 2, lg: 4 }}
           spacing={{ base: 4, lg: 8 }}
         >
-          {categories?.map((category) => (
-            <Card maxW="sm" key={category.idCategory}>
-              <CardBody>
-                <Box position="relative">
-                  <Image src={category.strCategoryThumb} borderRadius="lg" />
-                  <Box
-                    position="absolute"
-                    top="0"
-                    left="0"
-                    width="100%"
-                    height="100%"
-                    bg="gray.500"
-                    opacity="0.5"
-                    borderRadius="lg"
-                  />
-                  <Heading
-                    size={{ base: "sm", md: "md" }}
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    transform="translate(-50%, -50%)"
-                    color="white"
-                    textAlign="center"
-                  >
-                    {category.strCategory}
-                  </Heading>
-                </Box>
-                <Link href={`/list-meals/${category.strCategory}`}>
-                  <Button
-                    variant="solid"
-                    colorScheme="blue"
-                    width={"100%"}
-                    mt={4}
-                    fontSize={{ base: "sm", md: "md" }}
-                    padding={{ base: "8px", md: "16px" }}
-                    mx="auto"
-                  >
-                    View Detail
-                  </Button>
-                </Link>
-              </CardBody>
-            </Card>
+          {categories?.map((category, index) => (
+            <CategoryCard key={category.idCategory} category={category} index={index} />
           ))}
         </SimpleGrid>
       </div>
     </>
   );
 }
+
+const CategoryCard = ({ category, index }: { category: Category; index: number }) => {
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: index * 0.1 }}
+    >
+      <Card maxW="sm">
+        <CardBody>
+          <Box position="relative">
+            <Image src={category.strCategoryThumb} borderRadius="lg" />
+            <Box
+              position="absolute"
+              top="0"
+              left="0"
+              width="100%"
+              height="100%"
+              bg="gray.500"
+              opacity="0.5"
+              borderRadius="lg"
+            />
+            <Heading
+              size={{ base: "sm", md: "md" }}
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              color="white"
+              textAlign="center"
+            >
+              {category.strCategory}
+            </Heading>
+          </Box>
+          <Link href={`/list-meals/${category.strCategory}`}>
+            <Button
+              variant="solid"
+              colorScheme="blue"
+              width={"100%"}
+              mt={4}
+              fontSize={{ base: "sm", md: "md" }}
+              padding={{ base: "8px", md: "16px" }}
+              mx="auto"
+            >
+              View Detail
+            </Button>
+          </Link>
+        </CardBody>
+      </Card>
+    </motion.div>
+  );
+};
